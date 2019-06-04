@@ -1,0 +1,8 @@
+# Ignore binaries wherever they are
+/**/quiz
+/**/urlshort
+# Don't ignore folders with the same names as the binaries
+!/**/quiz/
+!/**/urlshort/
+# Ignore swap files 
+/**/.*.swp
