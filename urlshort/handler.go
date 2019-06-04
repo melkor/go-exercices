@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 
+	"github.com/BurntSushi/toml"
+	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v2"
 )
 
@@ -47,15 +49,36 @@ func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	if err != nil {
 		return nil, err
 	}
+	spew.Dump(cs)
 
+	urlsMap := getMap(cs)
+
+	return MapHandler(urlsMap, fallback), nil
+}
+
+func TOMLHandler(tml string, fallback http.Handler) (http.HandlerFunc, error) {
+	cs := make(map[string][]UrlMap)
+
+	_, err := toml.Decode(tml, &cs)
+	if err != nil {
+		return nil, err
+	}
+	spew.Dump(cs)
+	urlsMap := getMap(cs["urls"])
+
+	return MapHandler(urlsMap, fallback), nil
+}
+
+func getMap(cs []UrlMap) map[string]string {
 	urlsMap := make(map[string]string)
 	for _, c := range cs {
 		urlsMap[c.Path] = c.URL
 	}
-	return MapHandler(urlsMap, fallback), nil
+
+	return urlsMap
 }
 
 type UrlMap struct {
-	URL  string `yaml:"url"`
-	Path string `yaml:"path"`
+	URL  string `yaml:"url" toml:"url"`
+	Path string `yaml:"path" toml:"path"`
 }
