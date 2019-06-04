@@ -2,19 +2,38 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/spf13/pflag"
+)
+
+var (
+	mapFileYAML = pflag.StringP("yaml-map-file", "y", "", "urls mapping yaml file")
 )
 
 func main() {
+
+	pflag.Parse()
+
+	if *mapFileYAML == "" {
+		log.Fatalln("--yaml-map-file is mandatory")
+	}
+
+	yamlFile, err := ioutil.ReadFile(*mapFileYAML)
+	if err != nil {
+		log.Fatalln("error read yaml file:", err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", defaultHandler)
-	pathsToUrls := map[string]string{
-		"/lol":  "https://godoc.org/github.com/gophercises/urlshort",
-		"/bite": "https://godoc.org/gopkg.in/yaml.v2",
+
+	handler, err := YAMLHandler(yamlFile, mux)
+	if err != nil {
+		log.Fatalln("cannot instantiate handler: ", err)
 	}
-	//MapHandler(pathsToUrls, mux)
-	log.Fatal(http.ListenAndServe(":8080", MapHandler(pathsToUrls, mux)))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
