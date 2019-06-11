@@ -38,7 +38,7 @@ func (p *Philosopher) Think() {
 func (p *Philosopher) GetChopsticks() {
 	timeout := make(chan bool, 1)
 	fmt.Println(p.Name, " want chopsticks.")
-	go func() { time.Sleep(1e9); timeout <- true }()
+	go func() { time.Sleep(1 * time.Second); timeout <- true }()
 	//<-p.Chopstick
 	p.Chopstick.Lock()
 	fmt.Println(p.Name, " got his chopstick.")
